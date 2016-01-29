@@ -1,0 +1,31 @@
+# History files
+*.Rhistory
+*.Rapp.history
+# Example code in package build process
+*-Ex.R
+# RStudio files
+.Rproj.user/
+# produced vignettes
+*.html
+*.pdf
+.Rproj.user
+*.csv
+*.txt
+*.xls
+*.xlsx
+*.RData
+.Rbuildignore
+*.png
+*.rdata
+*.ffdat
+*.dat
+*.Rproj
+*.xml
+*.properties
+*.mf
+#profiler files
+*.nps
+
+
+/build/
+/dist/
