@@ -226,7 +226,7 @@ public class main {
         //Begin handling the processing.
         //First -- code for iterating through
         String str = "ID\tMatches ID \tDistance";
-        scList.stream().forEach((scList1) -> {
+        scList.parallelStream().forEach((scList1) -> {
             scList1.processCross();
         });
         try{//try to print out the headers; 
