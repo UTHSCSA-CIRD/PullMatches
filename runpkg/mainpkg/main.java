@@ -251,7 +251,7 @@ public class main {
             }catch(IOException e){
                 System.err.println("There was an issue with printing row... "+i+"\n"+e.getMessage());
             }
-            scList.stream().forEach((scList1) -> {
+            scList.parallelStream().forEach((scList1) -> {
                 scList1.clearTaken();
             });
         }
