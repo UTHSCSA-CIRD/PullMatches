@@ -61,25 +61,22 @@ public abstract class ArgHandler {
         if(s == null)System.exit(-1); //there was an error with that file, error report already generated
         
         int tmp; 
-        //temporary tree that we will search through so we can remove from ptAvail. 
+        //Finally optimized this. It's basically building a whole new ptAvail list
+        //containing only those patients that are in both the include list and the current ptAvail list. 
         TreeSet<Integer> include = new TreeSet<>();
         for(Integer i:s){
             tmp = getIndArg0(i);
             if(tmp == -1){
-                System.err.println("Inclusion List error! ID " + i + " is not an available patient.");
+                System.err.println("Warning: ID in the inclusion list " + i + " is not a valid patient.");
                 continue;
             }
-            include.add(tmp);
+            if(main.ptAvail.contains(tmp)) {
+                include.add(tmp);
+            }else{
+                System.out.println("Debug: ptAvail does not contain index: \t" + tmp + "\tof pt\t" + i);
+            }
         }
-        s = new ArrayList<>();
-        Iterator iter = main.ptAvail.iterator();//iterate through ptAvail
-        while(iter.hasNext()){
-            tmp = (Integer)iter.next();
-            if(!include.contains(tmp))s.add(tmp);//cache the values we need to remove so as not to disturb the iterator
-        }
-        for(Integer i : s){
-            main.ptAvail.remove(i);//remove now that we are nolonger using the iterator. 
-        }
+        main.ptAvail = include;
     }
     public static void handleExclusion(String exclusionFile){
         //this method accepts a string file and then will make sure that ptAvail does not contain any value in this file
