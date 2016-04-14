@@ -1,14 +1,8 @@
 package mainpkg;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  *
- * @author manuells
+ * @author Laura Manuel
  */
 import helperspkg.*;
 import elementHandlerpkg.*;
@@ -17,7 +11,6 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 public class main {
-    public static TreeSet<FileRef> refs =null;
     public static int ptSize; //the number of patients in the .ffdat files.
     public static ArrayList<Summary> ptList = null; // static list containing the pt ID numbers for the row/cols of .ffdat files. 
     public static TreeSet<Integer> ptAvail = null; //static list holds the indexes of the patients that are avilable. 
@@ -45,12 +38,12 @@ public class main {
     //tree set has more efficient add/delete/search than 
     /**
      * @param args the command line arguments
-     * @throws java.io.IOException
+     * @throws java.io.IOException Throws IOExceptions... 
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        if(args.length!=2&&args.length!=4&&args.length!=6 && args.length!=8 && args.length!=10 && args.length != 12 && args.length !=14){
-            System.err.println(ARGERROR+ "**SIZE CHECK**");
+        if(args.length!=2 && args.length !=4 && args.length != 6 && args.length!=8 && args.length!=10 && args.length != 12 && args.length !=14){
+            System.err.println(ARGERROR+ "\n**SIZE CHECK** Arglength is: " + args.length);
             for(String arg : args){
                 System.err.println(arg);
             }

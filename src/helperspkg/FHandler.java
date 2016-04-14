@@ -1,14 +1,9 @@
 package helperspkg;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- *
- * @author manuells
+ * This class, like ArgHandler, is a static method class used to keep the other static classes looking cleaner
+ * and to keep like actions together. (Note that this handler can easily be used in other programs requiring these functions
+ * whereas ArgHandler is specific to this program.)
+ * @author Laura Manuel
  */
 
 import java.io.*;
@@ -20,7 +15,18 @@ import java.nio.IntBuffer;
 public abstract class FHandler {
     //this class holds abstract method to handle the opening of files for Main 
     //and keep that code clean
+    /**
+     * Opens a the file in fStr and verifies that the opts operations can be performed on the file. 
+     * 
+     * @param fStr The string containing the name of the file to verify.
+     * @param opts The operations that we want to verify: 'R' read, 'W' Write, 'B' both. 
+     * @return The filePointer(File class) to that file opened with that operation or null.
+     */
     public static File verifyOpenFile(String fStr, char opts){
+        if(opts != 'R' && opts != 'W' && opts!= 'B'){
+            System.err.println("ERROR! Option: " + opts + " is not valid, may only use: R, W, or B for read, write, or both.");
+            System.exit(-1);
+        }
         File f = new File(fStr);
         if(!f.exists()){
             System.err.println("Warning: File " + fStr + " does not exist!!");
@@ -30,40 +36,25 @@ public abstract class FHandler {
             System.err.println("Error: " + fStr + " is not a file!!");
             return null;
         }
-        switch(opts){
-            case 'R':
-                if(!f.canRead()){
+        if(opts == 'R' || opts == 'B'){
+            if(!f.canRead()){
                     System.err.println("Error: No read access to " + fStr);
                     return null;
                 }
-                break;
-            case 'B'://both
-                if(!f.canRead()){
-                    System.err.println("Error: No read access to " + fStr);
-                    return null;
-                }
-            case 'W':
-                if(!f.canWrite()){
+        }
+        if(opts == 'W' || opts == 'B'){
+            if(!f.canWrite()){
                     System.err.println("Error: No write access to " + fStr);
                     return null;
                 }
-        }//end switch
+        }
         return f;
     }
-    public static ArrayList<File> readFilesFromAscii(File f, char mode){
-        ArrayList<String> st = readLinesFromAscii(f);
-        ArrayList<File> ret = new ArrayList<>();
-        if(st ==null) return null;
-        for (String st1 : st) {
-            File r = verifyOpenFile(st1, mode);
-            if (r == null) {
-                System.err.println("File " + st1 + "could not be opened ");
-                return null;
-            }
-            ret.add(r);
-        }
-        return ret;
-    }
+    /**
+     * Reads in all lines of an Ascii file and returns them in an array.
+     * @param f The file to read in
+     * @return All the lines of the file one line per array element and sorted by their appearance in the file. 
+     */
     public static ArrayList<String> readLinesFromAscii(File f){
         BufferedReader fr;
         try {
@@ -92,6 +83,7 @@ public abstract class FHandler {
         }
         return ret;
     }
+    /*Depreciated -- but keeping it just in case I want to read from a binary file later. 
     public static ArrayList<Integer> readIntFromffDat(File f){
         ArrayList<Integer> ret = new ArrayList<>();
         
@@ -117,6 +109,13 @@ public abstract class FHandler {
         }
         return ret;
     }
+    */
+    /**
+     * Reads all lines from an ascii file, then parses all of those lines into integers
+     * Prints an error message and continues if any of the numbers don't parse.
+     * @param f The file from which to read the integers. 
+     * @return An array of integers. 
+     */
     public static ArrayList<Integer> readIntFromAscii(File f){
         ArrayList<Integer> ret = new ArrayList<>();
         ArrayList<String> s = readLinesFromAscii(f);

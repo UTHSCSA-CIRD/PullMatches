@@ -6,14 +6,21 @@
 package elementHandlerpkg;
 import java.io.Serializable;
 /**
- *
- * @author manuells
+ * This contains an individual "level" summary for a patient. Showing how many instances of a particular level they have.
+ * 
+ * @author Laura Manuel
  */
 public class SummaryLevel implements Comparable<SummaryLevel>, Serializable{
     public final int level;
     public final int value;
     private static final long serialVersionUID = 1;
     
+    /**
+     * compareTo required by the sort function.
+     * @param a The SummaryLevel to compare it to.
+     * @return 1, -1, 0. Only compares the value of the level itself. 
+     */
+    @Override
     public int compareTo(SummaryLevel a){
         if(level>a.level)return 1;
         if(level<a.level)return -1;

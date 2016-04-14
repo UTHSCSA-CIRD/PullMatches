@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package helperspkg;
 import java.io.*;
 import java.util.ArrayList;
@@ -12,43 +8,22 @@ import mainpkg.main;
 import elementHandlerpkg.*;
 import java.util.Collections;
 /**
- *
- * @author manuells
+ * This class is basically your regular old static methods class used to keep the main class looking nice and 
+ * streamlined. 
+ * @author Laura Manuel
  */
 public abstract class ArgHandler {
-    public static void getFileRefTree(String arg2){
-        //takes arg 2- an ascii text file listing all of the files 
-        File catalogue = FHandler.verifyOpenFile(arg2, 'R');
-        if(catalogue == null){
-            System.err.println("Catalogue file invalid!!!");
-            System.exit(-1);
-        }
-        ArrayList<File> catalogueList = FHandler.readFilesFromAscii(catalogue, 'R');
-        if(catalogueList == null){
-            System.err.println("No lines read from catalogue list!!!");
-            System.exit(-1);
-        }
-        if(catalogueList.size() < 2){
-            System.err.println("Insufficient lines in the list. ");
-            System.exit(-1);
-        }
-        
-        
-        //initialize FileRefs to hold the RandomAccessFiles and hold the indexes. 
-        //Note:  index starts at 0 and is non-inclusive of the end index. 
-        long tmp = 0;
-        main.refs = new TreeSet<>();
-        for(int i = 1; i< catalogueList.size();i++){
-            FileRef ref = new FileRef();
-            boolean a = ref.initFile(catalogueList.get(i), tmp);
-            if(!a){
-                System.err.println("FileRef initialization error!");
-                System.exit(-1);
-            }
-            tmp = ref.getEndIndex();//update start index.
-            main.refs.add(ref);
-        }
-    }
+    /**
+     * This method handles the Inclusion list that may be passed on the argument list. It makes sure that only patients in
+     * the Inclusion file are available in the main.ptAvail list. NOTE that inclusion in the inclusion file does not
+     * mean that the patient will be included. The exclusion list, pt list, and compare pt list all play a roll in this. 
+     * 
+     * Dependency: FHandler.readIntFromAscii
+     * 
+     * Fails the program if the inclusion file has no patients, doesn't open,etc.
+     * 
+     * @param inclusionFile The string name of the argument file. 
+     */
     public static void handleInclusion(String inclusionFile){
         //this method accepts a string file and then will make sure that ptAvail contains only values in this file
         //note that if ptAvail does not already contain a value in inclusionFile it WILL NOT add that value; 
@@ -78,6 +53,15 @@ public abstract class ArgHandler {
         }
         main.ptAvail = include;
     }
+    /**
+     * Handles the exclusion file. This makes sure that no patient ID in this file is found in the main.ptAvail list.
+     * 
+     * Dependency: FHandler.readIntFromAscii
+     * 
+     * Fails on: invalid file.
+     * 
+     * @param exclusionFile The string name of the exclusion file.
+     */
     public static void handleExclusion(String exclusionFile){
         //this method accepts a string file and then will make sure that ptAvail does not contain any value in this file
         File pts = FHandler.verifyOpenFile(exclusionFile, 'R');
@@ -97,13 +81,22 @@ public abstract class ArgHandler {
             main.ptAvail.remove(tmp);//remove the indexes
         }
     }
+    /**
+     * This method creates the searchContainers for the case patients that need matches. 
+     * Creates the main.ptAvail and sclist. Adjusts the size of needs if there are not enough patients to accommodate
+     * the requested number of matches. Note that this number is checked and possibly adjusted again after the inclusion and exclusion.
+     * 
+     * Fails on: inaccessible file, no patients in file, ptList not yet created. 
+     * 
+     * @param arg1 The string name for the file containing the list of case patients.
+     */
+    //possible upgrade- remove the check for size big enough for needs because this should also be checked again after inclusion exclusion
     public static void createSearchContainers(String arg1){
         //this method creates the search containers for the patients listed in arg file 1
-        //Note that this should not be called until arg2 is handled (getFileRefTree) as it requires the
+        //Note that this should not be called until arg2 is handled as it requires the
         //ptList array to be initialized. 
-        //also needs to have had args[2] the third argument read.
         if(main.ptList == null){
-            System.err.println("ERROR! getFileRefTree must be called first.");
+            System.err.println("ERROR! Patient list was not yet created.");
             System.exit(-1);
         }
         File pts = FHandler.verifyOpenFile(arg1, 'R');
@@ -144,15 +137,17 @@ public abstract class ArgHandler {
             //less than 1% of the total memory at 2x. Reprofiling may be needed for large needs, however processing time with large
             //patient sets is more critical as we can utilize TACC for higher memory.
             //Note: once rehashing of the search containers is reduced to a minimum this part can be parallized. 
-            //Parallizing within the "clear" option which is the most likely location to "rehash" is not recommended due to latency.
-            //I.E. the potential to be waiting for some threads to finish. and the overhead of spawning or utilizing these threads if
-            //we can reduce the rehashing. This is the optimal location as all search containers should take approximately the same
-            //amount of time to finish.
             sc = new SearchContainer(i, tmp, (main.needs*100));
             main.scList.add(sc);
             main.ptAvail.remove(tmp);
         } 
     }
+    /**
+     * Gets the index for a patientID. (Since we don't expect the user to know the index order of the patients,
+     * they can just enter the patient numbers.)
+     * @param pt The patient number we are looking for the index to.
+     * @return The index of this patient in the main.ptAvail list. 
+     */
     private static int getIndArg0(int pt){
         int high = main.ptList.size();
         int low = 0;
@@ -172,6 +167,11 @@ public abstract class ArgHandler {
         }
         return -1;
     }
+    /**
+    * Creates the buffered writer for the output file. 
+    * @param arg4 The string name of the file we will be writing to. 
+    * @return The BufferedWriter to write to.
+    */
     public static BufferedWriter openOutFile(String arg4){
         //sets up the outpu file.
         //we don't need to check if the file exists since we want to create it if necessary and overwrite if necessary
@@ -189,6 +189,10 @@ public abstract class ArgHandler {
         System.exit(-1);
         return null;//Netbeans insists on a return statement despite the system.exit. *shrugs*
     }
+    /**
+     * Opens an existing levels.dat folder IF it exists and loads it. Otherwise we get a new LevelHolder.
+     * @return A LevelHolder to be used with the import.
+     */
     public static LevelHolder openLevels(){
         File levelsFile = FHandler.verifyOpenFile("levels.dat", 'B');
         LevelHolder levels = new LevelHolder();
@@ -209,6 +213,15 @@ public abstract class ArgHandler {
         }
         return levels;
     }
+    /**
+     * This depreciated the "loadNewInput" function because throttling it worked so much better! Memory was halved and it 
+     * even ran a bit faster. 
+     * 
+     * Fails on: the inputFile cannot be opened or read.
+     * 
+     * @param inputFile The string name of the file of patients to load.
+     * @param saveSummary Whether or not to save a summary of this file. The saving of the summary takes a while. 
+     */
     public static void loadNewInputThrottled(String inputFile, boolean saveSummary){
         //this method is much slower as it has to process each line, but it keeps the memory consumption down. 
         LevelHolder levels = openLevels();
@@ -347,6 +360,9 @@ public abstract class ArgHandler {
             }
         }
     }*/
+    /**
+     * Loads an existing summary file. 
+     */
     public static void loadSummaries(){
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File("summary.dat")))) {
             
@@ -366,6 +382,13 @@ public abstract class ArgHandler {
             System.exit(-1);
         }
     }
+    /**
+     * Parses a line from the load file. Currently parses by comma, but if you want/need to change it
+     * it's an easy fix, just change the a=levelLine.split("WhateverParseCharacter(s)YouWant");
+     * It also removes all quotation marks(") and white space in the strings. 
+     * @param levelLine The string to be parsed.
+     * @return An array of parsed strings. 
+     */
     private static String[] parseLevelLine(String levelLine){
         if(levelLine == null || levelLine.length() == 0){
             System.err.println("Empty or null line given to parser.");
@@ -379,7 +402,7 @@ public abstract class ArgHandler {
             System.err.println(levelLine + " does not meet parsing criteria, improper number of columns(commas).");
             return null;
         }
-        //removes the quotation marks sand trims the white space 
+        //removes the quotation marks and trims the white space 
         a[0] = a[0].replaceAll("\"", "");
         a[0] = a[0].trim();
         a[1] = a[1].replaceAll("\"", "");
@@ -388,6 +411,13 @@ public abstract class ArgHandler {
         a[2] = a[2].trim();
         return a;
     }
+    /**
+     * This allows you to say" Include only THESE levels. Note: This is likely to be refined in 
+     * the future...  Really should have a way of applying regular expressions to the levels to generate 
+     * this inclusion/exclusion list for a particular level file. OR a way to code the levels with regular expressions.
+     * @param e The levelHolder of levels we'll pull from to match the levels in f.
+     * @param f A string containing the name of a file where the levels we want to include are stored. 
+     */
     public static void levelInclusion(LevelHolder e, String f){
         File in = FHandler.verifyOpenFile(f, 'R');
         if(in == null){
@@ -412,6 +442,13 @@ public abstract class ArgHandler {
             main.availLevels.add(L);
         }
     }
+    /**
+     * This allows you to exclude levels. NOTE: Like levelInclusion the Exclusion is likely to change as we use
+     * regular expressions or at least provide the option to use regular expressions to help with inclusion and 
+     * exclusion. 
+     * @param e The level Holder form which we will be excluding the levels found in f.
+     * @param f A string containing the name of the file where the exclusion levels are stored. 
+     */
     public static void levelExclusion(LevelHolder e, String f){
         File in = FHandler.verifyOpenFile(f, 'R');
         if(in == null){

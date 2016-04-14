@@ -1,13 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package elementHandlerpkg;
 
 /**
- *
- * @author manuells
+ * The MatchSelector class handles popping the best matched patient from each SearchContainer and making sure that no 
+ * patient is duplicated in the matched output (all patient matches are unique and you don't have 2 controls that are the same
+ * patient.)
+ * @Laura Manuel
  */
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +17,25 @@ import java.util.Iterator;
 public class MatchSelector {
     ArrayList<Integer> cache; // caches the previous random order. This order will be shuffled every time. 
     Random r;
+    /**
+     * This pulls a row of matched patients from each of the search containers. Ahem:
+     * 1) First the matcher uses its random class and the Java Collections class to shuffle the cache of SearchContainers. 
+     * 2) MatchSelector iterates through the shuffled cache of SearchContainers
+     * 3) It pops the Element with the best distance from the SearchContainer with popMin()
+     * 3.5) If the SearchContainer has expended its list of Elements it calls processCross(taken) and refreshes the list of elements.
+     * 4) A MatchHolder is created and wrapped around the popped Element, then there is an attempt to add it to the table.
+     * 5) If there is a conflict (another patient has this patient) the matcher attempts to take the MatchHolder with the lowest distance score. 
+     * If the distance scores are equal (highly unlikely) it randomly selects one of the two matches to win.
+     * The loser becomes the new current SearchContainer, and steps 3-5 are repeated until there is no longer a conflict when
+     * attempting to add the element.
+     * 6)MatchSelector iterates over the taken list of MatchHolders, looks up the patient numbers for the indexes
+     * and creates a return string of each matched patient. It removes all of the "taken" patients from the main.ptAvail array
+     * and, if another row needs to be pulled, the calling class will then have the SearchContainers remove those patients 
+     * from their caches.
+     * 
+     * Note:Program fails if there are not enough patients to match. Note that there are checks earlier in the program to make sure that this error never happens. 
+     * @return A return string of the unique patients matched for this row from the SearchContainer. 
+     */
     public String pullRow(){
         //runs through all of the scList elements in random order and matches one row at a time.
         //returns the string that is printed
@@ -111,7 +128,13 @@ public class MatchSelector {
         //as it can be very processing and io intensive if we need to process cross again. 
         return ret; 
     }
-    
+    /**
+     * MatchSelector creates and fills a cache array with the SearchContainers from the main.scList. This cache
+     * allows the MatchSelector to shuffle the search containers without altering the 
+     * 
+     * @param seed The random seed for the randomization algorithm. This is either passed as an argument for debugging purposes
+     * or it is defaulted to the system long time. 
+     */
     public MatchSelector(long seed){
         //for debugging this allows you to use a set seed.
         cache = new ArrayList<>();

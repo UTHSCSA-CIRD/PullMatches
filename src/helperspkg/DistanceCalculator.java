@@ -1,20 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package helperspkg;
 import elementHandlerpkg.Summary;
 import elementHandlerpkg.SummaryLevel;
 import java.util.ArrayList;
-import java.util.Iterator;
 import mainpkg.main;
 
 /**
- *
- * @author manuells
+ *  This class contains the distance calculators for the matcher. These calculators can be update or new ones added. 
+ * Euclidean and BinaryDistance were created based on R's distance comparison function, but are optimized for 
+ * sparse- sorted lists of levels. 
+ * @author Laura Manuel
  */
 public abstract class DistanceCalculator {
+    /**
+     * Calculates the Euclidean distance from one patient to the other. This means that the 
+     * function takes into account the VALUE (or number of instances) for each level as well as the existence of a level
+     * You are less likely to get duplicate distance values with this than with the binary distance. 
+     * @param a One of the summaries. (it doesn't matter which)
+     * @param b The other summary. (again, it doesn't matter which because the distance will be the same either way.
+     * @return The distance between summary a and summary b
+     */
     public static double euclideanDistance(Summary a, Summary b){
         /*for each level- if both na/0 skip. if one or neither 0 process 
         *subtract a.value from b.vaue
@@ -87,6 +92,14 @@ public abstract class DistanceCalculator {
         }//end while
         return Math.sqrt(dist/(double)count);
     }
+    /**
+     * Calculates the binary distance from one patient to the other. This means that the 
+     * function takes into account ONLY the existence of a level, not its value.
+     * You are more likely to get duplicate distance values with this than with the Euclidean distance. 
+     * @param a One of the summaries. (it doesn't matter which)
+     * @param b The other summary. (again, it doesn't matter which because the distance will be the same either way.
+     * @return The distance between summary a and summary b
+     */
     public static double binaryDistance(Summary a, Summary b){
         ArrayList<SummaryLevel> aL = a.getLevels();
         ArrayList<SummaryLevel> bL = b.getLevels();

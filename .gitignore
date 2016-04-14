@@ -6,7 +6,6 @@
 # RStudio files
 .Rproj.user/
 # produced vignettes
-*.html
 *.pdf
 .Rproj.user
 *.csv
@@ -25,7 +24,6 @@
 *.mf
 #profiler files
 *.nps
-
+*.jar
 
 /build/
-/dist/
